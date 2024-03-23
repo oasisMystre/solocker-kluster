@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "noEmitOnError": true,
+    "resolveJsonModule": true,
+    "stripInternal": true,
+    "rootDir": ".",
+    "outDir": "dist",
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "skipLibCheck": true
+  },
+  "include": ["src"],
+  "ts-node": {
+    "files": true,
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
+}

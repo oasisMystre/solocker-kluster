@@ -1,0 +1,10 @@
+services:
+   - type: web
+     name: kluster
+     runtime: node
+     plan: free
+     autoDeploy: true
+     buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
+     startCommand: pnpm run serve
+     env:
+       fromGroup: kluster
