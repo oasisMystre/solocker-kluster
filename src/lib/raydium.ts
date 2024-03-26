@@ -30,7 +30,7 @@ export default class Raydium extends InjectRepository {
           if (lpInfo) return this.fetchPoolInfo(lpInfo, tokenAccount);
         })
         .filter((value) => Boolean(value))
-    );
+    ) as Promise<Awaited<ReturnType<typeof this.fetchPoolInfo>>[]>;
   }
 
   async fetchPoolInfo(
