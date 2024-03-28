@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+
 export default class Redis {
   readonly client: ReturnType<typeof createClient>;
 

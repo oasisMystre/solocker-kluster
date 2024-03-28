@@ -3,7 +3,6 @@ import { AccountInfo, ParsedAccountData, PublicKey } from "@solana/web3.js";
 
 import InjectRepository from "./injection";
 import { LpInfo } from "./shyft/models/lpInfo.model";
-import { Account } from "@metaplex-foundation/umi";
 
 export default class Raydium extends InjectRepository {
   async fetchAllPoolInfos(
@@ -11,7 +10,17 @@ export default class Raydium extends InjectRepository {
       ReturnType<typeof this.repository.token.getTokenAccounts>
     >
   ) {
-    const lpMints = tokenAccounts.map(
+    const filteredTokenAccounts = tokenAccounts
+      .filter(
+        ({ mintAccountInfo }) =>
+          (
+            mintAccountInfo!.data as ParsedAccountData
+          ).parsed.info.mintAuthority.toString() ===
+          "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"
+      )
+      .map(({ tokenAccount }) => tokenAccount);
+
+    const lpMints = filteredTokenAccounts.map(
       (tokenAccount) => tokenAccount.account.data.parsed.info.mint as string
     );
 
@@ -20,7 +29,7 @@ export default class Raydium extends InjectRepository {
     });
 
     return Promise.all(
-      tokenAccounts
+      filteredTokenAccounts
         .map((tokenAccount) => {
           const lpInfo = lpInfos.find(
             (lpInfo) =>

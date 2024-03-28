@@ -34,7 +34,6 @@ export class TokenVesting extends InjectRepository {
       if (contractInfo) contractInfo.seeds = contractInfo.seeds.toString();
 
       return {
-        seed: null,
         lpInfo,
         contractInfo,
       };

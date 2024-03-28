@@ -1,4 +1,4 @@
-import Fastify, { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 
 import { BaseRoute } from ".";
 import { serializeBigInt } from "../utils";
@@ -48,7 +48,11 @@ class RaydiumRoute extends BaseRoute {
     const { wallet } = request.body;
     const { mint } = request.params;
     const accountInfos = await (wallet
-      ? this.repository.token.getTokenAccount(mint, wallet)
+      ? this.repository.token
+          .getTokenAccount(mint, wallet)
+          .then((tokenAccount) =>
+            tokenAccount ? tokenAccount.tokenAccounts : null
+          )
       : this.repository.token.getAccountInfo(mint));
 
     if (!accountInfos || accountInfos.length === 0)
@@ -81,7 +85,7 @@ class RaydiumRoute extends BaseRoute {
 }
 
 export const raydiumRoutes = (
-  fastify: ReturnType<typeof Fastify>,
+  fastify: FastifyInstance,
   repository: Repository
 ) => {
   const route = new RaydiumRoute(repository);

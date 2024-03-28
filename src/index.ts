@@ -10,6 +10,7 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 import Repository from "./lib/repository";
 import { raydiumRoutes } from "./routes/raydium.route";
+import { metaplexRoutes } from "./routes/metaplex.route";
 import { tokenVestingRoutes } from "./routes/tokenVesting.route";
 
 export type RequestWithRepository = {
@@ -28,12 +29,14 @@ function createRepository() {
 
 const fastify = Fastify({
   logger: true,
+  ignoreTrailingSlash: true,
 });
 
 async function main() {
   const repository = createRepository();
 
   raydiumRoutes(fastify, repository);
+  metaplexRoutes(fastify, repository);
   tokenVestingRoutes(fastify, repository);
 
   await fastify.register(cors, {
@@ -44,7 +47,9 @@ async function main() {
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)),
+  credential: admin.credential.cert(
+    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)
+  ),
 });
 
 main().catch((err) => {
