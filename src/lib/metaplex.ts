@@ -42,7 +42,6 @@ export default class Metaplex extends InjectRepository {
           const jsonMetadata = await fetchJsonMetadata(umi, metadata.uri);
           metadata.jsonMetadata = jsonMetadata;
         } else {
-          const mint = metadata.mint;
           metadata.jsonMetadata = {
             mint: metadata.mint,
             name: metadata.name,

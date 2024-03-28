@@ -21,15 +21,21 @@ class MetaplexRoute extends BaseRoute {
   async getDigitalAssetsByByOwner(req: FastifyRequest<{ Params: Params }>) {
     const { wallet } = req.params;
     const { token, metaplex } = this.repository;
-    console.log(wallet);
     const tokenAccounts = await token.getNormalTokenAccounts(wallet);
     const mints = tokenAccounts.map((tokenAccount) =>
       tokenAccount.account.data.parsed.info.mint.toString()
     );
 
-    console.log(mints);
-
     const digitalAssets = await metaplex.fetchAllMintMetadata(...mints);
+    digitalAssets.forEach((digitalAsset: any) => {
+      const tokenAccount = tokenAccounts.find(
+        (tokenAccount) =>
+          tokenAccount.account.data.parsed.info.mint ===
+          digitalAsset.mint
+      );
+      digitalAsset.token = tokenAccount?.account.data.parsed.info;
+    });
+
     return serializeBigInt(digitalAssets);
   }
 }
