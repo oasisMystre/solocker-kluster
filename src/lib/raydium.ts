@@ -7,20 +7,11 @@ import { LpInfo } from "./shyft/models/lpInfo.model";
 export default class Raydium extends InjectRepository {
   async fetchAllPoolInfos(
     tokenAccounts: Awaited<
-      ReturnType<typeof this.repository.token.getTokenAccounts>
+      ReturnType<typeof this.repository.token.getLpTokenAccounts>
     >
   ) {
-    const filteredTokenAccounts = tokenAccounts
-      .filter(
-        ({ mintAccountInfo }) =>
-          (
-            mintAccountInfo!.data as ParsedAccountData
-          ).parsed.info.mintAuthority.toString() ===
-          "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1"
-      )
-      .map(({ tokenAccount }) => tokenAccount);
 
-    const lpMints = filteredTokenAccounts.map(
+    const lpMints = tokenAccounts.map(
       (tokenAccount) => tokenAccount.account.data.parsed.info.mint as string
     );
 
@@ -29,7 +20,7 @@ export default class Raydium extends InjectRepository {
     });
 
     return Promise.all(
-      filteredTokenAccounts
+      tokenAccounts
         .map((tokenAccount) => {
           const lpInfo = lpInfos.find(
             (lpInfo) =>

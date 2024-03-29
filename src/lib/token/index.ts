@@ -90,7 +90,7 @@ export default class Token extends InjectRepository {
         ({ mintAccountInfo }) =>
           (
             mintAccountInfo!.data as ParsedAccountData
-          ).parsed.info.mintAuthority.toString() === authority
+          ).parsed.info.mintAuthority?.toString() === authority
       )
       .map(({ tokenAccount }) => tokenAccount);
   }

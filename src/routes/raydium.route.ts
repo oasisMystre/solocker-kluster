@@ -36,7 +36,7 @@ class RaydiumRoute extends BaseRoute {
     const { wallet } = request.body;
     return serializeBigInt(
       await this.repository.raydium.fetchAllPoolInfos(
-        await this.repository.token.getTokenAccounts(wallet)
+        await this.repository.token.getLpTokenAccounts(wallet)
       )
     );
   }
@@ -78,6 +78,7 @@ class RaydiumRoute extends BaseRoute {
     );
 
     if (poolInfo) return serializeBigInt(poolInfo);
+    
     return reply.code(404).send({
       message: "poolInfo not found for mint " + mint,
     });

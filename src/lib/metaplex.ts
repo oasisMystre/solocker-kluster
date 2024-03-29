@@ -40,7 +40,10 @@ export default class Metaplex extends InjectRepository {
       allMetadata.map(async (metadata: any) => {
         if (metadata.uri.trim().length > 0) {
           const jsonMetadata = await fetchJsonMetadata(umi, metadata.uri);
-          metadata.jsonMetadata = jsonMetadata;
+          metadata.jsonMetadata =
+            typeof jsonMetadata === "string"
+              ? JSON.parse(jsonMetadata)
+              : jsonMetadata;
         } else {
           metadata.jsonMetadata = {
             mint: metadata.mint,
@@ -73,9 +76,14 @@ export default class Metaplex extends InjectRepository {
     )) as MetadataWithJsonMetadata;
 
     if (metadata === null) return null;
-    if (metadata.uri.trim().length > 0)
-      metadata.jsonMetadata = await fetchJsonMetadata(umi, metadata.uri);
 
+    if (metadata.uri.trim().length > 0) {
+      const jsonMetadata = await fetchJsonMetadata(umi, metadata.uri);
+      metadata.jsonMetadata =
+        typeof jsonMetadata === "string"
+          ? JSON.parse(jsonMetadata)
+          : jsonMetadata;
+    }
     return metadata;
   }
 
