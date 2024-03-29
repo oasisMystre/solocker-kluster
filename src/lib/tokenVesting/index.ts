@@ -36,9 +36,14 @@ export class TokenVesting extends InjectRepository {
         contractInfo.seed = contractInfo.seeds.toString(undefined, 0, 31);
         delete contractInfo["seeds"];
 
-        const mintMetadata = await metaplex.fetchMetadata(
+        const mintMetadata = (await metaplex.fetchMetadata(
           contractInfo.mintAddress.toBase58()
+        )) as any;
+
+        const tokenAccount = tokenAccounts.find((tokenAccount) =>
+          tokenAccount.pubkey.equals(contractInfo.destinationAddress)
         );
+        mintMetadata.token = tokenAccount?.account.data.parsed.info;
 
         return {
           mintMetadata,
@@ -61,7 +66,11 @@ export class TokenVesting extends InjectRepository {
 
     const contractInfos = await Promise.all(
       atas.map((ata) =>
-        getContractInfoByTokenAddress(connection, new PublicKey(programId!), ata)
+        getContractInfoByTokenAddress(
+          connection,
+          new PublicKey(programId!),
+          ata
+        )
       )
     );
 
