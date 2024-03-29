@@ -22,7 +22,7 @@ async function main() {
 
   // await tokenVesting(repository);
   // await tokenAccountTest(repository);
-  await tokenLock(repository);
+  // await tokenLock(repository);
 }
 
 main().catch(console.error);

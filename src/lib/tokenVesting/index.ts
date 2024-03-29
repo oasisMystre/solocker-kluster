@@ -1,4 +1,3 @@
-import lodash from "lodash";
 import { PublicKey } from "@solana/web3.js";
 import { getContractInfoByTokenAddress } from "@solocker/vesting";
 
