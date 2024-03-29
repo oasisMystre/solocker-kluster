@@ -8,6 +8,7 @@ import {
 import {
   create,
   generateRandomSeed,
+  getContractInfoByTokenAddress,
   Numberu64,
   Schedule,
   unlock,
@@ -34,37 +35,16 @@ export default async function tokenLock(repository: Repository) {
   const mint = new PublicKey("HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr");
 
   const senderAta = getAssociatedTokenAddressSync(mint, wallet.publicKey);
-console.log(seed)
 
-    // const instructions = await create(
-    //   repository.connection,
-    //   TOKEN_VESTING_PROGRAM_ID,
-    //   Buffer.from(seed),
-    //   wallet.publicKey,
-    //   wallet.publicKey,
-    //  senderAta,
-    //   senderAta,
-    //   new PublicKey("HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr"),
-    //   [
-    //     Schedule.new(
-    //       new Numberu64(Math.round(Date.now() / 1000) + 2 * 60),
-    //       new Numberu64(0.5 * Math.pow(10, 6))
-    //     ),
-    //   ]
-    // );
-
-  const instructions = await unlock(
+  const info = await getContractInfoByTokenAddress(
     repository.connection,
     TOKEN_VESTING_PROGRAM_ID,
-    Buffer.from("4717331768400466640386444062827885496678185520348278193136282413"),
-    mint
-  );
-  const transaction = new Transaction().add(...instructions);
-  const tx = await sendAndConfirmTransaction(
-    repository.connection,
-    transaction,
-    [wallet]
+    new PublicKey("C8jsBa48Ms9Ga6RM8TeZG2wt1fpkcVWvfrKW2gnXjJqB"),
+    new PublicKey("42mdw3F7dzagzBTDGUb2dS2qAZzz6iz9SXF4gciN6Yo9")
   );
 
-  console.log("Tx: ", tx);
+  console.log(info)
+
+  // const t = await repository.token.getNormalTokenAccounts(wallet.publicKey.toBase58());
+  // console.log(t.map(r => r.pubkey.toBase58()))
 }
