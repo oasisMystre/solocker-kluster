@@ -17,3 +17,12 @@ export const serializeBigInt = <T extends object>(value: T) =>
 
 export const isDeadWallet = (address: PublicKey) =>
   address.equals(new PublicKey("11111111111111111111111111111111"));
+
+export const isURL = (value: string) => {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+};

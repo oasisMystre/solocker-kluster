@@ -1,6 +1,7 @@
 import base58 from "bs58";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import {
+  unlock,
   generateRandomSeed,
   getContractInfoByTokenAddress,
 } from "@solocker/vesting";

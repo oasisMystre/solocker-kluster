@@ -1,22 +1,46 @@
 import { PublicKey } from "@solana/web3.js";
-import { publicKey } from "@metaplex-foundation/umi";
+import { publicKey, Umi } from "@metaplex-foundation/umi";
 import {
   fetchJsonMetadata,
   safeFetchAllMetadata,
   type JsonMetadata,
   type Metadata,
   safeFetchMetadata,
-  MPL_TOKEN_METADATA_PROGRAM_ID,
-  fetchAllDigitalAssetByOwner,
+  MPL_TOKEN_METADATA_PROGRAM_ID
 } from "@metaplex-foundation/mpl-token-metadata";
 
 import InjectRepository from "./injection";
+import { catchAndReturnNull, isURL } from "../utils";
 
 const programId = new PublicKey(MPL_TOKEN_METADATA_PROGRAM_ID);
 
 export type MetadataWithJsonMetadata = {
   jsonMetadata?: JsonMetadata;
 } & Metadata;
+
+export const getDefaultJsonMetadata = (metadata: Metadata) => {
+  return {
+    mint: metadata.mint,
+    name: metadata.name,
+    symbol: metadata.symbol,
+    image: `https://img.raydium.io/icon/${metadata.mint}.png`,
+  };
+};
+
+export async function safeFetchJsonMetadata(umi: Umi, metadata: Metadata) {
+  if (isURL(metadata.uri)) {
+    const jsonMetadata = await catchAndReturnNull(
+      fetchJsonMetadata(umi, metadata.uri)
+    );
+
+    if (jsonMetadata)
+      return typeof jsonMetadata === "string"
+        ? JSON.parse(jsonMetadata)
+        : jsonMetadata;
+  }
+
+  return getDefaultJsonMetadata(metadata);
+}
 
 export default class Metaplex extends InjectRepository {
   async fetchAllMintMetadata(...addresses: string[]) {
@@ -37,23 +61,9 @@ export default class Metaplex extends InjectRepository {
     const allMetadata = await safeFetchAllMetadata(umi, mints);
 
     return Promise.all(
-      allMetadata.map(async (metadata: any) => {
-        if (metadata.uri.trim().length > 0) {
-          const jsonMetadata = await fetchJsonMetadata(umi, metadata.uri);
-          metadata.jsonMetadata =
-            typeof jsonMetadata === "string"
-              ? JSON.parse(jsonMetadata)
-              : jsonMetadata;
-        } else {
-          metadata.jsonMetadata = {
-            mint: metadata.mint,
-            name: metadata.name,
-            image: `https://img.raydium.io/icon/${metadata.mint}.png`,
-            symbol: metadata.symbol,
-          };
-        }
-
-        return metadata as unknown as MetadataWithJsonMetadata;
+      allMetadata.map(async (metadata: MetadataWithJsonMetadata) => {
+        metadata.jsonMetadata = await safeFetchJsonMetadata(umi, metadata);
+        return metadata;
       })
     );
   }
@@ -73,23 +83,12 @@ export default class Metaplex extends InjectRepository {
     const metadata = (await safeFetchMetadata(
       umi,
       publicKey(pda.toBase58())
-    )) as MetadataWithJsonMetadata;
+    )) as MetadataWithJsonMetadata | null;
 
     if (metadata === null) return null;
 
-    if (metadata.uri.trim().length > 0) {
-      const jsonMetadata = await fetchJsonMetadata(umi, metadata.uri);
-      metadata.jsonMetadata =
-        typeof jsonMetadata === "string"
-          ? JSON.parse(jsonMetadata)
-          : jsonMetadata;
-    }
+    metadata.jsonMetadata = await safeFetchJsonMetadata(umi, metadata);
+
     return metadata;
-  }
-
-  getDigitalAssetsByOwner(owner: string) {
-    const { umi } = this.repository;
-
-    return fetchAllDigitalAssetByOwner(umi, publicKey(owner));
   }
 }
