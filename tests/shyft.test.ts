@@ -1,11 +1,10 @@
 import "dotenv/config";
 
 import ShyftApi from "../src/lib/shyft";
+import Repository from "../src/lib/repository";
 
-async function main() {
-  const shfyt = new ShyftApi({
-    apiKey: process.env.SHYFT_API_KEY!,
-  });
+export async function shyftTest(repository: Repository) {
+  const shfyt = repository.shyft;
 
   console.log(
     await shfyt.queryLpInfo({
@@ -15,8 +14,6 @@ async function main() {
           "ELGZATuAb4CTxMNCV45cbH13oRt5jW7Cdbi6wJAX8J3b",
         ],
       },
-    }),
+    })
   );
 }
-
-main().catch(console.log);

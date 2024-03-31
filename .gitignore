@@ -4,3 +4,4 @@ dist
 serviceAccount.json
 .env
 .idea
+test.js
