@@ -1,5 +1,3 @@
-import { ShyftSdk, Network } from "@shyft-to/js";
-
 import Repository from "../src/lib/repository";
 
 export async function shyftTest(repository: Repository) {

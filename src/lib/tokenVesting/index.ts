@@ -7,6 +7,8 @@ import {
 import Repository from "../repository";
 import InjectRepository from "../injection";
 
+console.log(TOKEN_VESTING_PROGRAM_ID.toBase58())
+
 export class TokenVesting extends InjectRepository {
   constructor(repository: Repository) {
     super(repository);
