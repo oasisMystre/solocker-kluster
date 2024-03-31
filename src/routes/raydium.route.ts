@@ -1,4 +1,4 @@
-import Fastify, { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 
 import { BaseRoute } from ".";
 import { serializeBigInt } from "../utils";
@@ -36,7 +36,7 @@ class RaydiumRoute extends BaseRoute {
     const { wallet } = request.body;
     return serializeBigInt(
       await this.repository.raydium.fetchAllPoolInfos(
-        await this.repository.token.getTokenAccounts(wallet)
+        await this.repository.token.getLpTokenAccounts(wallet)
       )
     );
   }
@@ -48,7 +48,11 @@ class RaydiumRoute extends BaseRoute {
     const { wallet } = request.body;
     const { mint } = request.params;
     const accountInfos = await (wallet
-      ? this.repository.token.getTokenAccount(mint, wallet)
+      ? this.repository.token
+          .getTokenAccount(mint, wallet)
+          .then((tokenAccount) =>
+            tokenAccount ? tokenAccount.tokenAccounts : null
+          )
       : this.repository.token.getAccountInfo(mint));
 
     if (!accountInfos || accountInfos.length === 0)
@@ -74,6 +78,7 @@ class RaydiumRoute extends BaseRoute {
     );
 
     if (poolInfo) return serializeBigInt(poolInfo);
+    
     return reply.code(404).send({
       message: "poolInfo not found for mint " + mint,
     });
@@ -81,7 +86,7 @@ class RaydiumRoute extends BaseRoute {
 }
 
 export const raydiumRoutes = (
-  fastify: ReturnType<typeof Fastify>,
+  fastify: FastifyInstance,
   repository: Repository
 ) => {
   const route = new RaydiumRoute(repository);

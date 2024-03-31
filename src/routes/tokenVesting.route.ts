@@ -4,13 +4,13 @@ import { BaseRoute } from ".";
 import { serializeBigInt } from "../utils";
 import Repository from "../lib/repository";
 
-type Params = {
+type Body = {
   wallet: string;
   programId: string;
 };
 
-const ParamSchema = {
-  params: {
+const Schema = {
+  body: {
     type: "object",
     properties: {
       wallet: { type: "string" },
@@ -20,18 +20,25 @@ const ParamSchema = {
 };
 
 class TokenVestingRoute extends BaseRoute {
-  async getTokenVestingByOwner(
-    request: FastifyRequest<{ Querystring: Params }>,
-    reply: FastifyReply
-  ) {
-    const { wallet, programId } = request.query;
-    if (!wallet || wallet.trim().length < 32)
-      return reply.code(400).send({
-        message: "wallet is required in query",
-      });
+  async getContractInfoByOwner(req: FastifyRequest<{ Querystring: Body }>) {
+    const { wallet, programId } = req.query;
 
     return serializeBigInt(
-      await this.repository.tokenVesting.getContractInfoByOwner(wallet, programId)
+      await this.repository.tokenVesting.getContractInfoByOwner(
+        wallet,
+        programId
+      )
+    );
+  }
+
+  async getLpContractInfoByOwner(req: FastifyRequest<{ Querystring: Body }>) {
+    const { wallet, programId } = req.query;
+
+    return serializeBigInt(
+      await this.repository.tokenVesting.getLpContractInfoByOwner(
+        wallet,
+        programId
+      )
     );
   }
 }
@@ -44,10 +51,19 @@ export const tokenVestingRoutes = (
 
   fastify.route({
     method: "GET",
-    url: "/token-vesting/",
+    url: "/token-vesting/contract-infos/",
     schema: {
-      params: ParamSchema,
+      querystring: Schema,
     },
-    handler: route.getTokenVestingByOwner.bind(route),
+    handler: route.getContractInfoByOwner.bind(route),
+  });
+
+  fastify.route({
+    method: "GET",
+    url: "/token-vesting/lp-contract-infos/",
+    schema: {
+      querystring: Schema,
+    },
+    handler: route.getLpContractInfoByOwner.bind(route),
   });
 };

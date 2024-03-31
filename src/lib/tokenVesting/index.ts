@@ -1,9 +1,12 @@
-import { TOKEN_VESTING_PROGRAM_ID } from "@bonfida/token-vesting";
+import { PublicKey } from "@solana/web3.js";
+import { getContractInfoByTokenAddress } from "@solocker/vesting";
 
 import Repository from "../repository";
-import { ContractInfo } from "./models";
 import InjectRepository from "../injection";
-import { extractSeedFromTxData } from "./utils";
+
+export const TOKEN_VESTING_PROGRAM_ID = new PublicKey(
+  "888UZeqfZHU8oMmLJdcEgGGYRWwWKSG8Jx1DU83EDxCx"
+);
 
 export class TokenVesting extends InjectRepository {
   constructor(repository: Repository) {
@@ -12,65 +15,77 @@ export class TokenVesting extends InjectRepository {
 
   async getContractInfoByOwner(wallet: string, programId?: string) {
     programId = programId ?? TOKEN_VESTING_PROGRAM_ID.toBase58();
-    const { raydium, shyft, token, firebase } = this.repository;
-    const { docs } = await firebase.firestore
-      .collection(wallet)
-      .where("tx", "!=", null)
-      .get();
 
-    const contractInfos = docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() } as unknown as ContractInfo)
+    const { connection, token, metaplex } = this.repository;
+    const tokenAccounts = await token.getNormalTokenAccounts(wallet);
+    const atas = tokenAccounts.map((tokenAccount) => tokenAccount.pubkey);
+
+    let contractInfos = await Promise.all(
+      atas.map((ata) => {
+        return getContractInfoByTokenAddress(
+          connection,
+          new PublicKey(programId!),
+          ata
+        );
+      })
     );
-    const txIds = contractInfos.map(({ tx }) => tx);
-    const seeds = await this.decodeSeeds(txIds, programId);
 
     return Promise.all(
-      txIds.map(async (tx, index) => {
-        const seed = seeds.at(index);
-        if (seed === null) return null;
-        const contractInfo = contractInfos.find(
-          (contractInfo) => contractInfo.tx === tx
-        )!;
+      contractInfos.flat().map(async (contractInfo: any) => {
+        contractInfo.seed = contractInfo.seeds.toString(undefined, 0, 31);
+        delete contractInfo["seeds"];
 
-        const [lpInfo] = await shyft.queryLpInfo({
-          lpMint: {
-            _eq: contractInfo.mintAddress,
-          },
-        });
+        const mintMetadata = (await metaplex.fetchMetadata(
+          contractInfo.mintAddress.toBase58()
+        )) as any;
 
-        const [tokenAccount] = (await token.getTokenAccount(
-          contractInfo.mintAddress,
-          wallet
-        ))!;
+        const tokenAccount = tokenAccounts.find((tokenAccount) =>
+          tokenAccount.pubkey.equals(contractInfo.destinationAddress)
+        );
+        mintMetadata.token = tokenAccount?.account.data.parsed.info;
 
         return {
-          seed,
+          mintMetadata,
           contractInfo,
-          lpInfo: await raydium.fetchPoolInfo(lpInfo, tokenAccount),
         };
       })
     );
   }
 
-  async decodeSeeds(txIds: string[], programId: string) {
-    const { connection } = this.repository;
-    const transactions = await connection.getParsedTransactions(txIds);
+  async getLpContractInfoByOwner(wallet: string, programId?: string) {
+    programId = programId ?? TOKEN_VESTING_PROGRAM_ID.toBase58();
 
-    return transactions.map((transaction) => {
-      if (transaction == null) return null;
-      let instructions = transaction!.transaction.message.instructions;
-      instructions = instructions.filter(
-        (instruction) => instruction.programId.toString() === programId
-      );
+    const { raydium, connection, token } = this.repository;
+    const tokenAccounts = await token.getLpTokenAccounts(wallet);
 
-      if (instructions.length > 0) {
-        const instruction = instructions.at(0)!;
-        return "data" in instruction
-          ? extractSeedFromTxData(instruction.data)
-          : null;
-      }
+    const lpInfos = await raydium.fetchAllPoolInfos(tokenAccounts);
+    const atas = lpInfos.map(
+      (lpInfo) => new PublicKey(lpInfo.lpTokenMetadata.mint)
+    );
 
-      return null;
+    const contractInfos = await Promise.all(
+      atas.map((ata) =>
+        getContractInfoByTokenAddress(
+          connection,
+          new PublicKey(programId!),
+          ata
+        )
+      )
+    );
+
+    return contractInfos.flat().map((contractInfo: any) => {
+      const lpInfo = lpInfos.find(
+        (lpInfo) =>
+          contractInfo.mintAddress.toBase58() === lpInfo.lpTokenMetadata.mint
+      )!;
+
+      contractInfo.seed = contractInfo.seeds.toString(undefined, 0, 31);
+      delete contractInfo["seeds"];
+
+      return {
+        lpInfo,
+        contractInfo,
+      };
     });
   }
 }

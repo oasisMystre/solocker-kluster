@@ -25,6 +25,7 @@ export default class ShyftApi {
   }
 
   async queryLpInfo(where: Parameters<typeof queryLpInfo>[1]) {
+    
     return (await queryLpInfo(this.client, where)).Raydium_LiquidityPoolv4;
   }
 
