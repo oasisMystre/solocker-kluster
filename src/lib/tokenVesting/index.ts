@@ -1,12 +1,11 @@
 import { PublicKey } from "@solana/web3.js";
-import { getContractInfoByTokenAddress } from "@solocker/vesting";
+import {
+  getContractInfoByTokenAddress,
+  TOKEN_VESTING_PROGRAM_ID,
+} from "@solocker/vesting";
 
 import Repository from "../repository";
 import InjectRepository from "../injection";
-
-export const TOKEN_VESTING_PROGRAM_ID = new PublicKey(
-  "888UZeqfZHU8oMmLJdcEgGGYRWwWKSG8Jx1DU83EDxCx"
-);
 
 export class TokenVesting extends InjectRepository {
   constructor(repository: Repository) {
