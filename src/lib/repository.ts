@@ -16,15 +16,15 @@ export default class Repository {
   readonly tokenVesting: TokenVesting;
   readonly firebase: Firebase;
 
-  constructor(
-    readonly connection: Connection,
-    readonly umi: Umi,
-  ) {
+  constructor(readonly connection: Connection, readonly umi: Umi) {
     this.firebase = new Firebase();
     this.token = new Token(this);
     this.metaplex = new Metaplex(this);
     this.raydium = new Raydium(this);
     this.tokenVesting = new TokenVesting(this);
-    this.shyft = new ShyftApi({ apiKey: process.env.SHYFT_API_KEY! });
+    this.shyft = new ShyftApi({
+      apiKey: process.env.SHYFT_API_KEY!,
+      network: "mainnet-beta",
+    });
   }
 }
