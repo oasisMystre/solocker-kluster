@@ -8,6 +8,7 @@ import Repository from "../src/lib/repository";
 import { tokenVesting } from "./tokenVesting.test";
 import { tokenAccountTest } from "./tokenAccount.test";
 import tokenLock from "./tokenLock.test";
+import { shyftTest } from "./shyft.test";
 
 admin.initializeApp({
   credential: admin.credential.cert(require("../serviceAccount.json")),
@@ -23,6 +24,7 @@ async function main() {
   // await tokenVesting(repository);
   // await tokenAccountTest(repository);
   // await tokenLock(repository);
+  await shyftTest(repository);
 }
 
 main().catch(console.error);
