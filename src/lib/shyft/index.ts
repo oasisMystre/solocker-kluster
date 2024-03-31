@@ -12,6 +12,7 @@ export default class ShyftApi {
     this.client = new GraphQLClient(
       this.buildURLWithQueryParams("https://programs.shyft.to/v0/graphql/", {
         api_key,
+        network:"devnet"
       }),
       {
         method: "POST",
