@@ -28,14 +28,20 @@ export default class Token extends InjectRepository {
       token2022Accounts.value
     );
 
-    return Promise.all(
-      tokenAccountsByOwner.map(async (tokenAccount) => {
-        const mintAccountInfo = await connection.getParsedAccountInfo(
-          new PublicKey(tokenAccount.account.data.parsed.info.mint)
-        );
-        return { tokenAccount, mintAccountInfo: mintAccountInfo.value };
-      })
+    const mints = tokenAccountsByOwner.map(
+      (tokenAccount) =>
+        new PublicKey(tokenAccount.account.data.parsed.info.mint)
     );
+
+    const parseAccountResponse = await connection.getMultipleParsedAccounts(
+      mints
+    );
+    const accountInfos = parseAccountResponse.value;
+
+    return tokenAccountsByOwner.map((tokenAccount, index) => {
+      const mintAccountInfo = accountInfos[index];
+      return { tokenAccount, mintAccountInfo: mintAccountInfo };
+    });
   }
 
   async getTokenAccount(mintAddress: string, walletAddress: string) {
