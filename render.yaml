@@ -2,7 +2,12 @@ services:
    - type: web
      name: solocker
      runtime: node
-     plan: free
+     plan: starter
      autoDeploy: true
      buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
      startCommand: pnpm run serve
+     envVars:
+       - fromGroup: solocker
+     domains:
+       - "api.solocker.app"
+       
