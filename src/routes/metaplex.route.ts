@@ -3,6 +3,7 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import { BaseRoute } from ".";
 import { serializeBigInt } from "../utils";
 import Repository from "../lib/repository";
+import loadNativeToken from "../lib/solana";
 
 type Params = {
   wallet: string;
@@ -20,9 +21,9 @@ const Schema = {
 class MetaplexRoute extends BaseRoute {
   async getDigitalAssetsByByOwner(req: FastifyRequest<{ Params: Params }>) {
     const { wallet } = req.params;
-    const { token, metaplex } = this.repository;
+    const { token, metaplex, connection } = this.repository;
     const tokenAccounts = await token.getNormalTokenAccounts(wallet);
-    console.log(tokenAccounts)
+    console.log(tokenAccounts);
     const mints = tokenAccounts.map((tokenAccount) =>
       tokenAccount.account.data.parsed.info.mint.toString()
     );
@@ -31,11 +32,12 @@ class MetaplexRoute extends BaseRoute {
     digitalAssets.forEach((digitalAsset: any) => {
       const tokenAccount = tokenAccounts.find(
         (tokenAccount) =>
-          tokenAccount.account.data.parsed.info.mint ===
-          digitalAsset.mint
+          tokenAccount.account.data.parsed.info.mint === digitalAsset.mint
       );
       digitalAsset.token = tokenAccount?.account.data.parsed.info;
     });
+
+    digitalAssets.unshift((await loadNativeToken(connection, wallet)) as any);
 
     return serializeBigInt(digitalAssets);
   }
