@@ -4,6 +4,7 @@ import {
   unlock,
   generateRandomSeed,
   getContractInfoByTokenAddress,
+  TOKEN_VESTING_PROGRAM_ID,
 } from "@solocker/vesting";
 
 import Repository from "../src/lib/repository";
@@ -12,10 +13,6 @@ import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 function loadWallet() {
   return Keypair.fromSecretKey(base58.decode(process.env.WALLET!));
 }
-
-export const TOKEN_VESTING_PROGRAM_ID = new PublicKey(
-  "888UZeqfZHU8oMmLJdcEgGGYRWwWKSG8Jx1DU83EDxCx"
-);
 
 export default async function tokenLock(repository: Repository) {
   const wallet = loadWallet();
