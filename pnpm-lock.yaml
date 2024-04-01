@@ -30,8 +30,8 @@ dependencies:
     specifier: ^1.89.1
     version: 1.89.1
   '@solocker/vesting':
-    specifier: ^0.0.4
-    version: 0.0.4(@solana/spl-token@0.3.11)(@solana/web3.js@1.89.1)
+    specifier: ^0.0.7
+    version: 0.0.7(@solana/spl-token@0.3.11)(@solana/web3.js@1.89.1)
   axios:
     specifier: ^1.6
     version: 1.6.7
@@ -525,8 +525,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@solocker/vesting@0.0.4(@solana/spl-token@0.3.11)(@solana/web3.js@1.89.1):
-    resolution: {integrity: sha512-0yS78zdRICruDteWmzIaCTIZZM2tssRLgcUBpFmXWn5nzieFxhr5AKTSLLCpEUpDkz5sLcN5Xy54tChfijIxRw==}
+  /@solocker/vesting@0.0.7(@solana/spl-token@0.3.11)(@solana/web3.js@1.89.1):
+    resolution: {integrity: sha512-jEXk7g7PMWjKFfjiFJ3COF6xAKgTFj+nShBdqLNEW6qk1KUU+ipdU4wAa6Io+hq52TRw/SstQypnGqhZWkc6jA==}
     peerDependencies:
       '@solana/spl-token': 0.3.7
       '@solana/web3.js': ^1.73.2
