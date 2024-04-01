@@ -1,13 +1,15 @@
+import { NATIVE_MINT } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 
 export default async function loadNativeToken(
   connection: Connection,
   walletAddress: string
 ) {
-  const mint = new PublicKey("So11111111111111111111111111111111111111111");
+  const mint = NATIVE_MINT;
   const wallet = new PublicKey(walletAddress);
-  const balance = await connection.getBalance(wallet);
+  
   const decimals = 6;
+  const balance = await connection.getBalance(wallet);
   const amount = balance / Math.pow(10, decimals);
 
   return {
