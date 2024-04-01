@@ -6,7 +6,6 @@ import Metaplex from "./metaplex";
 import Raydium from "./raydium";
 import ShyftApi from "./shyft";
 import { TokenVesting } from "./tokenVesting";
-import { Firebase } from "./firebase";
 
 export default class Repository {
   readonly token: Token;
@@ -14,10 +13,8 @@ export default class Repository {
   readonly raydium: Raydium;
   readonly metaplex: Metaplex;
   readonly tokenVesting: TokenVesting;
-  readonly firebase: Firebase;
 
   constructor(readonly connection: Connection, readonly umi: Umi) {
-    this.firebase = new Firebase();
     this.token = new Token(this);
     this.metaplex = new Metaplex(this);
     this.raydium = new Raydium(this);

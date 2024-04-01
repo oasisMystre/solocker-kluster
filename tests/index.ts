@@ -1,5 +1,4 @@
 import "dotenv/config";
-import admin from "firebase-admin";
 
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -9,10 +8,6 @@ import { tokenVesting } from "./tokenVesting.test";
 import { tokenAccountTest } from "./tokenAccount.test";
 import tokenLock from "./tokenLock.test";
 import { shyftTest } from "./shyft.test";
-
-admin.initializeApp({
-  credential: admin.credential.cert(require("../serviceAccount.json")),
-});
 
 async function main() {
   const endpoint =

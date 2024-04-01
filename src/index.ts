@@ -1,7 +1,5 @@
 import "dotenv/config";
 
-import admin from "firebase-admin";
-
 import cors from "@fastify/cors";
 import Fastify, { FastifyRequest } from "fastify";
 
@@ -45,12 +43,6 @@ async function main() {
 
   await fastify.listen({ host, port });
 }
-
-admin.initializeApp({
-  credential: admin.credential.cert(
-    JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)
-  ),
-});
 
 main().catch((err) => {
   fastify.log.error(err);
