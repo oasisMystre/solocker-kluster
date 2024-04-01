@@ -8,7 +8,7 @@ export default async function loadNativeToken(
   const mint = NATIVE_MINT;
   const wallet = new PublicKey(walletAddress);
   
-  const decimals = 6;
+  const decimals = 9;
   const balance = await connection.getBalance(wallet);
   const amount = balance / Math.pow(10, decimals);
 
