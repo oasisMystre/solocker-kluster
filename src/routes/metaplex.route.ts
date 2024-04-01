@@ -23,7 +23,6 @@ class MetaplexRoute extends BaseRoute {
     const { wallet } = req.params;
     const { token, metaplex, connection } = this.repository;
     const tokenAccounts = await token.getNormalTokenAccounts(wallet);
-    console.log(tokenAccounts);
     const mints = tokenAccounts.map((tokenAccount) =>
       tokenAccount.account.data.parsed.info.mint.toString()
     );
