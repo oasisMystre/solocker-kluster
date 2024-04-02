@@ -87,19 +87,19 @@ export default class Raydium extends InjectRepository {
   async fetchLpPoolInfo(
     lpInfo: Awaited<ReturnType<typeof this.loadTokenAccountsPoolInfo>>[number]
   ) {
-    const { connection } = this.repository;
+    // const { connection } = this.repository;
 
     const lpTokenMetadata = lpInfo.lpMintMetadata;
     const baseTokenMetadata = lpInfo.baseMintMetadata;
     const quoteTokenMetadata = lpInfo.quoteMintMetadata;
 
-    const baseTokenBalance = await connection.getTokenAccountBalance(
-      new PublicKey(lpInfo.baseVault)
-    );
+    // const baseTokenBalance = await connection.getTokenAccountBalance(
+    //   new PublicKey(lpInfo.baseVault)
+    // );
 
-    const quoteTokenBalance = await connection.getTokenAccountBalance(
-      new PublicKey(lpInfo.quoteVault)
-    );
+    // const quoteTokenBalance = await connection.getTokenAccountBalance(
+    //   new PublicKey(lpInfo.quoteVault)
+    // );
 
     const denominator = new BN(10).pow(new BN(lpInfo.baseDecimal));
     const tokenData = lpInfo.tokenAccount.account.data;
@@ -125,8 +125,8 @@ export default class Raydium extends InjectRepository {
           : lpInfo.baseDecimal,
       baseTokenDecimal: lpInfo.baseDecimal,
       quoteTokenDecimal: lpInfo.quoteDecimal,
-      baseVaultBalance: baseTokenBalance.value.uiAmount,
-      quoteVaultBalance: quoteTokenBalance.value.uiAmount,
+      // baseVaultBalance: baseTokenBalance.value.uiAmount,
+      // quoteVaultBalance: quoteTokenBalance.value.uiAmount,
       totalLpAmount: new BN(lpInfo.lpReserve).div(denominator).toNumber(),
       addedLpAmount:
         "parsed" in tokenData && "tokenAmount" in tokenData.parsed.info
