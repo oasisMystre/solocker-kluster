@@ -1,53 +1,97 @@
 import BN from "bn.js";
-import { AccountInfo, ParsedAccountData, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
 import InjectRepository from "./injection";
 import { LpInfo } from "./shyft/models/lpInfo.model";
 
 export default class Raydium extends InjectRepository {
-  async fetchAllPoolInfos(
+  async loadTokenAccountsPoolInfo(
     tokenAccounts: Awaited<
       ReturnType<typeof this.repository.token.getLpTokenAccounts>
     >
   ) {
+    const { shyft, metaplex } = this.repository;
 
     const lpMints = tokenAccounts.map(
       (tokenAccount) => tokenAccount.account.data.parsed.info.mint as string
     );
 
-    const lpInfos = await this.repository.shyft.queryLpInfo({
+    const lpInfos = await shyft.queryLpInfo({
       lpMint: { _in: lpMints },
     });
 
-    return Promise.all(
-      tokenAccounts
-        .map((tokenAccount) => {
-          const lpInfo = lpInfos.find(
-            (lpInfo) =>
-              lpInfo.lpMint === tokenAccount.account.data.parsed.info.mint
-          );
+    const mints = new Set<string>();
 
-          if (lpInfo) return this.fetchPoolInfo(lpInfo, tokenAccount);
-        })
-        .filter((value) => Boolean(value))
-    ) as Promise<Awaited<ReturnType<typeof this.fetchPoolInfo>>[]>;
+    const lpInfoAndTokenAccounts = lpInfos.map((lpInfo) => {
+      const tokenAccount = tokenAccounts.find(
+        (tokenAccount) =>
+          tokenAccount.account.data.parsed.info.mint === lpInfo.lpMint
+      )!;
+
+      mints.add(lpInfo.lpMint);
+      mints.add(lpInfo.baseMint);
+      mints.add(lpInfo.quoteMint);
+
+      return [lpInfo, tokenAccount] as [
+        LpInfo,
+        Awaited<
+          ReturnType<typeof this.repository.token.getLpTokenAccounts>
+        >[number]
+      ];
+    });
+
+    const mintsMetadata = await metaplex.fetchAllMintMetadata(...mints);
+
+    const lpInfoAndTokenAccountsWithMetadata = lpInfoAndTokenAccounts.map(
+      ([lpInfo, tokenAccount]) => {
+        const lpMintMetadata = mintsMetadata.find(
+          (metadata) => metadata.mint.toString() === lpInfo.lpMint
+        );
+
+        const baseMintMetadata = mintsMetadata.find(
+          (metadata) => metadata.mint.toString() === lpInfo.baseMint
+        );
+
+        const quoteMintMetadata = mintsMetadata.find(
+          (metadata) => metadata.mint.toString() === lpInfo.quoteMint
+        );
+
+        return {
+          ...lpInfo,
+          lpMintMetadata,
+          baseMintMetadata,
+          quoteMintMetadata,
+          tokenAccount,
+        };
+      }
+    );
+
+    return lpInfoAndTokenAccountsWithMetadata;
   }
 
-  async fetchPoolInfo(
-    lpInfo: LpInfo,
-    tokenAccount: {
-      pubkey: PublicKey;
-      account:
-        | AccountInfo<ParsedAccountData>
-        | AccountInfo<Buffer | ParsedAccountData>;
-    }
+  async fetchTokenAccountsLpPoolInfo(
+    tokenAccounts: Awaited<
+      ReturnType<typeof this.repository.token.getLpTokenAccounts>
+    >
   ) {
-    const { metaplex, connection } = this.repository;
+    const tokenAccountsPoolInfo = await this.loadTokenAccountsPoolInfo(
+      tokenAccounts
+    );
+    return Promise.all(
+      tokenAccountsPoolInfo.map((tokenAccountPoolInfo) =>
+        this.fetchLpPoolInfo(tokenAccountPoolInfo)
+      )
+    );
+  }
 
-    const lpTokenMetadata = await metaplex.fetchMetadata(lpInfo.lpMint);
+  async fetchLpPoolInfo(
+    lpInfo: Awaited<ReturnType<typeof this.loadTokenAccountsPoolInfo>>[number]
+  ) {
+    const { connection } = this.repository;
 
-    const baseTokenMetadata = await metaplex.fetchMetadata(lpInfo.baseMint);
-    const quoteTokenMetadata = await metaplex.fetchMetadata(lpInfo.quoteMint);
+    const lpTokenMetadata = lpInfo.lpMintMetadata;
+    const baseTokenMetadata = lpInfo.baseMintMetadata;
+    const quoteTokenMetadata = lpInfo.quoteMintMetadata;
 
     const baseTokenBalance = await connection.getTokenAccountBalance(
       new PublicKey(lpInfo.baseVault)
@@ -58,7 +102,7 @@ export default class Raydium extends InjectRepository {
     );
 
     const denominator = new BN(10).pow(new BN(lpInfo.baseDecimal));
-    const tokenData = tokenAccount.account.data;
+    const tokenData = lpInfo.tokenAccount.account.data;
 
     return {
       lpTokenMetadata: lpTokenMetadata

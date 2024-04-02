@@ -57,7 +57,7 @@ export class TokenVesting extends InjectRepository {
     const { raydium, connection, token } = this.repository;
     const tokenAccounts = await token.getLpTokenAccounts(wallet);
 
-    const lpInfos = await raydium.fetchAllPoolInfos(tokenAccounts);
+    const lpInfos = await raydium.fetchTokenAccountsLpPoolInfo(tokenAccounts);
     const atas = lpInfos.map(
       (lpInfo) => new PublicKey(lpInfo.lpTokenMetadata.mint)
     );

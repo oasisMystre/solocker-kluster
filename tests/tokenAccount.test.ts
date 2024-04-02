@@ -5,7 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import { catchAndReturnNull, serializeBigInt } from "../src/utils";
 
 export async function tokenAccountTest(repository: Repository) {
-  const tokenAccounts = await repository.token.getNormalTokenAccounts(
+  const tokenAccounts = await repository.token.getLpTokenAccounts(
     "E9Sq8hSnH4zSuScu53gykLEFCqrVU9DD1i6FjD4Et5Mf"
   );
 
