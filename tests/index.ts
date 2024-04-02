@@ -16,11 +16,11 @@ async function main() {
   const connection = new Connection(endpoint);
   const repository = new Repository(connection, umi);
 
-  // await tokenVesting(repository);
+  await tokenVesting(repository);
   // await tokenAccountTest(repository);
   // await tokenLock(repository);
   // await shyftTest(repository);
-  await raydiumTest(repository, "E9Sq8hSnH4zSuScu53gykLEFCqrVU9DD1i6FjD4Et5Mf");
+  // await raydiumTest(repository, "E9Sq8hSnH4zSuScu53gykLEFCqrVU9DD1i6FjD4Et5Mf");
 }
 
 main().catch(console.error);

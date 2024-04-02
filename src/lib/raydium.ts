@@ -105,6 +105,7 @@ export default class Raydium extends InjectRepository {
     const tokenData = lpInfo.tokenAccount.account.data;
 
     return {
+      pubKey: lpInfo.tokenAccount.pubkey,
       lpTokenMetadata: lpTokenMetadata
         ? lpTokenMetadata
         : {
