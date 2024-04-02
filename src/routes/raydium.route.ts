@@ -35,7 +35,7 @@ class RaydiumRoute extends BaseRoute {
   async getLpInfos(request: FastifyRequest<{ Body: Body }>) {
     const { wallet } = request.body;
     return serializeBigInt(
-      await this.repository.raydium.fetchAllPoolInfos(
+      await this.repository.raydium.fetchTokenAccountsLpPoolInfo(
         await this.repository.token.getLpTokenAccounts(wallet)
       )
     );
@@ -69,16 +69,11 @@ class RaydiumRoute extends BaseRoute {
         message: mint + " is not a lp mint",
       });
 
-    const [lpInfo] = lpInfos;
-    const [accountInfo] = accountInfos;
+    const poolInfos =
+      await this.repository.raydium.fetchTokenAccountsLpPoolInfo(accountInfos);
 
-    const poolInfo = await this.repository.raydium.fetchPoolInfo(
-      lpInfo,
-      accountInfo
-    );
+    if (poolInfos.length > 0) return serializeBigInt(poolInfos[0]);
 
-    if (poolInfo) return serializeBigInt(poolInfo);
-    
     return reply.code(404).send({
       message: "poolInfo not found for mint " + mint,
     });

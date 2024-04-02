@@ -1,4 +1,4 @@
-import { ParsedAccountData, PublicKey } from "@solana/web3.js";
+import { AccountInfo, ParsedAccountData, PublicKey } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 
 import { LpAuthority } from "./state";
@@ -80,7 +80,12 @@ export default class Token extends InjectRepository {
     );
 
     return accountInfo && accountInfo.value
-      ? [{ pubkey: mint, account: accountInfo.value }]
+      ? [
+          {
+            pubkey: mint,
+            account: accountInfo.value as AccountInfo<ParsedAccountData>,
+          },
+        ]
       : null;
   }
 
