@@ -1,16 +1,14 @@
-import { createClient } from "redis";
+import IORedis from "ioredis";
 
 export default class Redis {
-  readonly client: ReturnType<typeof createClient>;
+  readonly client: IORedis;
 
   constructor() {
-    this.client = createClient({
-      url: process.env.REDIS_URL,
-    });
+    this.client = new IORedis(process.env.REDIS_URL!);
   }
 
-  async exist(key: string) {
-    return this.client.json.get(key);
+  async exists(key: string) {
+    return this.client.exists(key);
   }
 
   async set(key: string, value: Record<string, any>) {

@@ -32,8 +32,8 @@ const ParamSchema = {
 };
 
 class RaydiumRoute extends BaseRoute {
-  async getLpInfos(request: FastifyRequest<{ Body: Body }>) {
-    const { wallet } = request.body;
+  async getLpInfos(request: FastifyRequest<{ Querystring: Body }>) {
+    const { wallet } = request.query;
     return serializeBigInt(
       await this.repository.raydium.fetchTokenAccountsLpPoolInfo(
         await this.repository.token.getLpTokenAccounts(wallet)
@@ -42,10 +42,10 @@ class RaydiumRoute extends BaseRoute {
   }
 
   async getLpInfo(
-    request: FastifyRequest<{ Body: Body; Params: Params }>,
+    request: FastifyRequest<{ Querystring: Body; Params: Params }>,
     reply: FastifyReply
   ) {
-    const { wallet } = request.body;
+    const { wallet } = request.query;
     const { mint } = request.params;
     const accountInfos = await (wallet
       ? this.repository.token
@@ -87,19 +87,19 @@ export const raydiumRoutes = (
   const route = new RaydiumRoute(repository);
 
   fastify.route({
-    method: "POST",
+    method: "GET",
     url: "/raydium/lp-infos/",
     schema: {
-      body: BodySchema,
+      querystring: BodySchema,
     },
     handler: route.getLpInfos.bind(route),
   });
 
   fastify.route({
-    method: "POST",
+    method: "GET",
     url: "/raydium/lp-infos/:mint/",
     schema: {
-      body: BodySchema,
+      querystring: BodySchema,
       params: ParamSchema,
     },
     handler: route.getLpInfo.bind(route),

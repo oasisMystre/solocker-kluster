@@ -1,7 +1,12 @@
 import "dotenv/config";
 
 import cors from "@fastify/cors";
+import redis from "@fastify/redis";
+import cache from "@fastify/caching";
 import Fastify, { FastifyRequest } from "fastify";
+
+/// @ts-ignore
+import abstractCache from "abstract-cache";
 
 import { Connection } from "@solana/web3.js";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
@@ -32,14 +37,24 @@ const fastify = Fastify({
 
 async function main() {
   const repository = createRepository();
+  const abCache = abstractCache({
+    useAwait: false,
+    driver: {
+      name: "abstract-cache-redis",
+      options: { client: repository.redis.client },
+    },
+  });
 
   raydiumRoutes(fastify, repository);
   metaplexRoutes(fastify, repository);
   tokenVestingRoutes(fastify, repository);
 
-  await fastify.register(cors, {
-    origin: "*",
-  });
+  await fastify
+    .register(cors, {
+      origin: "*",
+    })
+    .register(redis, { client: repository.redis.client })
+    .register(cache, { cache: abCache });
 
   await fastify.listen({ host, port });
 }
