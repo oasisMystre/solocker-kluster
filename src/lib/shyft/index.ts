@@ -8,7 +8,7 @@ import { LpInfo } from "./models/lpInfo.model";
 
 type ShyftApiParams = {
   apiKey: string;
-  network: "devnet" | "mainnet-beta";
+  network?: "devnet" | "mainnet-beta";
 };
 
 export default class ShyftApi extends InjectRepository {
@@ -22,7 +22,7 @@ export default class ShyftApi extends InjectRepository {
     this.client = new GraphQLClient(
       this.buildURLWithQueryParams("https://programs.shyft.to/v0/graphql/", {
         api_key,
-        network,
+        //network,
       }),
       {
         method: "POST",
