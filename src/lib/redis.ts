@@ -4,7 +4,7 @@ export default class Redis {
   readonly client: IORedis;
 
   constructor() {
-    this.client = new IORedis();
+    this.client = new IORedis(process.env.REDIS_URL!);
   }
 
   async exists(key: string) {
