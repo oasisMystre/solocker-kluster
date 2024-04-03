@@ -47,7 +47,7 @@ export default class ShyftApi extends InjectRepository {
       for (const cache of caches) {
         if (cache) {
           previousCached.push(cache);
-          notCached = notCached.filter((value) => value === cache.lpMint);
+          notCached = notCached.filter((value) => value !== cache.lpMint);
         }
       }
 
