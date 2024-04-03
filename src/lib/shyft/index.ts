@@ -53,7 +53,6 @@ export default class ShyftApi extends InjectRepository {
 
       where.lpMint._in = notCached;
     }
-    console.log(previousCached)
 
     if (
       where.lpMint &&
