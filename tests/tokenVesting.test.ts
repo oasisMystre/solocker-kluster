@@ -11,7 +11,7 @@ import { serializeBigInt } from "../src/utils";
 export async function tokenVesting(repository: Repository) {
   console.log(
     await repository.tokenVesting.getLpContractInfoByOwner(
-      "E9Sq8hSnH4zSuScu53gykLEFCqrVU9DD1i6FjD4Et5Mf"
+      "GvirGUULBWbYEiqjwMaLU5v1dtsVktDhNEoZTBj7jA6s"
     )
   );
 

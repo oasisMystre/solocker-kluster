@@ -9,7 +9,7 @@ import { TokenVesting } from "./tokenVesting";
 import Redis from "./redis";
 
 export default class Repository {
-  readonly redis: Redis;
+  readonly redis: Redis; 
   readonly token: Token;
   readonly shyft: ShyftApi;
   readonly raydium: Raydium;
