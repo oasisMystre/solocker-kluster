@@ -24,7 +24,6 @@ export default class Repository {
     this.tokenVesting = new TokenVesting(this);
     this.shyft = new ShyftApi(this, {
       apiKey: process.env.SHYFT_API_KEY!,
-      network: "mainnet-beta",
     });
   }
 }
