@@ -4,7 +4,7 @@ export default class Redis {
   readonly client: IORedis;
 
   constructor() {
-    this.client = new IORedis(process.env.REDIS_URL!);
+    this.client = new IORedis();
   }
 
   async exists(key: string) {
@@ -13,6 +13,11 @@ export default class Redis {
 
   async set(key: string, value: Record<string, any>) {
     await this.client.set(key, JSON.stringify(value));
+  }
+
+  async getMany<T>(key: string[]) {
+    const results = await this.client.mget(key);
+    return results.map((result) => (result ? (JSON.parse(result) as T) : null));
   }
 
   async get<T>(key: string) {

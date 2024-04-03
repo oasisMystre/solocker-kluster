@@ -38,22 +38,29 @@ export default class ShyftApi extends InjectRepository {
     let previousCached: LpInfo[] = [];
 
     if (where.lpMint && where.lpMint._in) {
-      const notCached: (string | number)[] = [];
+      let notCached: (string | number)[] = where.lpMint._in;
 
-      previousCached = await Promise.all(
-        where.lpMint._in
-          .map(async (_in) => {
-            const cached = await this.repository.redis.get<LpInfo | null>(
-              _in.toString()
-            );
-            if (!cached) notCached.push(_in);
-            return cached;
-          })
-          .filter((cached) => Boolean(cached)) as unknown as LpInfo[]
+      const caches = await this.repository.redis.getMany<LpInfo>(
+        where.lpMint._in.map((_in) => _in.toString())
       );
+
+      for (const cache of caches) {
+        if (cache) {
+          previousCached.push(cache);
+          notCached = notCached.filter((value) => value === cache.lpMint);
+        }
+      }
 
       where.lpMint._in = notCached;
     }
+    console.log(previousCached)
+
+    if (
+      where.lpMint &&
+      where.lpMint._in &&
+      where.lpMint._in.length === previousCached.length
+    )
+      return previousCached;
 
     const lpPools = (await queryLpInfo(this.client, where))
       .Raydium_LiquidityPoolv4;
@@ -61,7 +68,7 @@ export default class ShyftApi extends InjectRepository {
       lpPools.map((lpPool) => this.repository.redis.set(lpPool.lpMint, lpPool))
     );
 
-    return lpPools;
+    return [...previousCached, ...lpPools];
   }
 
   buildURLWithQueryParams(path: string, params: Record<string, any>) {
