@@ -37,6 +37,9 @@ export default class ShyftApi extends InjectRepository {
   async queryLpInfo(where: Parameters<typeof queryLpInfo>[1]) {
     let previousCached: LpInfo[] = [];
 
+    if(where.lpMint?._in?.length == 0) 
+      return [];
+
     if (where.lpMint && where.lpMint._in) {
       let notCached: (string | number)[] = where.lpMint._in;
 
